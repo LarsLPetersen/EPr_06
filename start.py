@@ -8,4 +8,4 @@ __email__ = "lilian_mendoza@hotmail.com, petersen@informatik.uni-frankfurt.de"
 class Guest(object):
     """Create an hotel guest"""
 
-    def __init__(self, guest_id, wlan_code, 
+    def __init__(self, guest_id, arrival, departure, 
