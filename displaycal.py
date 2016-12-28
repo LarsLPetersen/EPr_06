@@ -2,6 +2,15 @@
 Simple calendar using ttk Treeview together with calendar and datetime
 classes.
 """
+
+__author__ = "5625448: Lilian Mendoza de Sudan, 6xxxx: Lars Petersen"
+__copyright__ = "Copyright 2015 – stackoverflow.com von fhdrsdg"
+__email__ = "lilian_mendoza@hotmail.com, h.qaderi@rocketmail.com"
+
+# http://svn.python.org/projects/sandbox/trunk/ttk-gsoc/samples/ttkcalendar.py
+# tkk calendar class / python calendar widget - return the user-selected date
+# This great code (slightly modified) was coded by fhdrsdg.
+
 import calendar
 from tkinter import *
 from tkinter import ttk
