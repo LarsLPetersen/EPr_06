@@ -1,0 +1,113 @@
+Systemidee
+-----------
+Die Software-Anwendung MyHotel soll die regelmäßig anfallenden
+Verwaltungsaufgaben an der Rezeption eines kleinen Hotels unterstützen.
+Dies umfasst neben der Verwaltung der Buchungen, welche im System
+angelegt, storniert und bearbeitet werden können, die Verwaltung der Zimmer,
+also deren zeitliche und kundenspezifische Belegung.
+Ferner wird MyHotel eine übersichtliche Kundenverwaltung ermöglichen, die
+die detailgenaue Einsicht in gemachte Buchungen und Rechnungsstatus erlaubt.
+Als besonderes Feature ist die Dienstplanerstellung für das Rezeptionspersonal
+sowie die Erzeugung sicherer W-Lan-Schlüssel zu nennen. In Grundzügen wird
+MyHotel auch die Mittel für eine digitale Rechnungsbuchhaltung bereitstellen.
+
+Das als grafische Desktop-Anwendung konzipierte Python-Programm erfordert
+einen lauffähigen Python-Interpreter (Version 3.5) auf der
+zugrundeliegenden Hardware. Es gibt darüber hinaus keine speziellen
+Anforderungen an das Betriebssystem.
+Eine gleichzeitige Nutzung durch mehr als einen Anwender wird per se nicht
+unterstützt. Schnittstellen zu anderen IT-Systemen werden nicht bereitgestellt.
+
+Das vereinbarte Lieferdatum für das Release 1.0 ist der 07.01.2016.
+Die Leistung wird unentgeltlich erbracht.
+
+
+
+Stakeholder
+------------
+Rezeptionsangestellter
+-   Interessen:
+    -   Hauptnutzer der Anwendung
+    -   wünscht sich eine effiziente Unterstützung bei der Abwicklung
+        seiner Arbeitsprozesse
+    -   wünscht sich einen schnellen Zugriff auf von anderen Hotelmitarbeitern
+        oder Kunden angefragte Informationen
+-   benötigte Funktionen:
+    -   Buchungen machen / stornieren
+    -   Zimmerverwaltung (Belegung, Zuordnung zu Kunden, freie Zimmer für
+        einen bestimmten Zeitraum anzeigen)
+    -   Kundenverwaltung (Kundennummer, gemachte Buchungen, bezahlte und
+        offene Rechnungen)
+    -   Schlüsselverwaltung
+    -   W-Lan-Schlüssel erzeugen
+-   Sorgen:
+    -   Umgang mit Anwendung ist schwer erlernbar
+    -   Anwendung ist nicht benutzerfreundlich
+    -   Anwendung arbeitet fachlich nicht korrekt
+    -   Anwendung fällt aus -> Wie arbeite ich dann?
+    -   Anwendung macht meinen Arbeitsplatz ggf. überflüssig
+-   Bewertung (Risiko: 5, Aufwand: )
+
+Hotelbesitzer
+-   Interessen:
+    -   Besteller der Anwendung
+    -   wünscht sich, dass vor allem die Rezeptionsangestellten effizient mit
+        der Anwendung arbeiten können
+    -   wünscht sich, schnell einen Überblick über die aktuelle und
+        zukünftige Auslastung zu erhalten
+    -   wünscht sich eine Ablösung seiner bisher manuell anzufertigenden
+        Dienstpläne für das Rezeptionspersonal
+-   benötigte Funktionen:
+    -   Belegung der Zimmer (aktuell und zukünftig)
+    -   Dienstpläne der Rezeptionsangstellten automatisch erstellen und
+        in Datei exportieren, die auch mit dem Programm wieder einlesbar ist
+    -   Einsicht in Tagesumsatz / Wochenumsatz / Monatsumsatz
+-   Sorgen:
+    -   Umgang mit Anwendung ist schwer erlernbar
+    -   Anwendung ist nicht benutzerfreundlich
+    -   Anwendung arbeitet fachlich nicht korrekt
+    -   Anwendung fällt aus -> Wie arbeite ich dann?
+    -   Wie schnell können Fehler behoben werden?
+    -   Wird der Liefertermin eingehalten?
+    -   Wird der Kostenplan eingehalten?
+    -   Welche Funktionalitäten werden (doch) nicht geliefert?
+    -   eventuell hohe Wartungskosten
+-   Bewertung (Risiko: 6, Aufwand: )
+
+Reinigungspersonal
+-   Interessen:
+-   benötigte Funktionen:
+-   Sorgen:
+-   Bewertung (Risiko: 2, Aufwand: )
+
+Buchhaltungspersonal
+-   Interessen:
+-   benötigte Funktionen:
+    -   einfaches Buchhaltungssystem
+-   Sorgen:
+    -   
+-   Bewertung (Risiko: 3, Aufwand: )
+
+Gast
+-   Interessen:
+-   benötigte Funktionen:
+-   Sorgen:
+-   Bewertung (Risiko: 2, Aufwand: )
+
+Online-Anbieter Hotelreservierungssystemen
+-   Interessen:
+-   benötigte Funktionen:
+-   Sorgen:
+-   Bewertung (Risiko: 1, Aufwand: )
+
+
+
+Anwendungsfälle
+----------------
+Name
+Kurzbeschreibung
+Auslöser
+Ergebnis
+Akteure
+Bedingungen
+Essenzielle Schritte
