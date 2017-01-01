@@ -226,8 +226,8 @@ class Calendar(ttk.Frame):
 
 def select_date():
     import sys
-    root = Tk()
-    root.title('Select a date')
+    cal = Tk()
+    cal.title('Select a date')
     ttkcal = Calendar(firstweekday=calendar.MONDAY)
     ttkcal.pack(expand=1, fill='both')
 
@@ -235,7 +235,7 @@ def select_date():
         style = ttk.Style()
         style.theme_use('clam')
 
-    root.mainloop()
+    cal.mainloop()
 
     x = ttkcal.selection    
     
