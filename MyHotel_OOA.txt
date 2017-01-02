@@ -46,7 +46,8 @@ Rezeptionsangestellter
     -   Anwendung arbeitet fachlich nicht korrekt
     -   Anwendung fällt aus -> Wie arbeite ich dann?
     -   Anwendung macht meinen Arbeitsplatz ggf. überflüssig
--   Bewertung (Risiko: 5, Aufwand: )
+-   Bewertung (Risiko: 5, Aufwand: 2)
+
 
 Hotelbesitzer
 -   Interessen:
@@ -58,10 +59,11 @@ Hotelbesitzer
     -   wünscht sich eine Ablösung seiner bisher manuell anzufertigenden
         Dienstpläne für das Rezeptionspersonal
 -   benötigte Funktionen:
-    -   Belegung der Zimmer (aktuell und zukünftig)
+    -   Zimmerverwaltung (Belegung, freie Zimmer für einen bestimmten Zeitraum
+        anzeigen) - sporadisch
     -   Dienstpläne der Rezeptionsangstellten automatisch erstellen und
         in Datei exportieren, die auch mit dem Programm wieder einlesbar ist
-    -   Einsicht in Tagesumsatz / Wochenumsatz / Monatsumsatz
+    -   (sporadische) Einsicht in Tagesumsatz / Wochenumsatz / Monatsumsatz
 -   Sorgen:
     -   Umgang mit Anwendung ist schwer erlernbar
     -   Anwendung ist nicht benutzerfreundlich
@@ -72,38 +74,112 @@ Hotelbesitzer
     -   Wird der Kostenplan eingehalten?
     -   Welche Funktionalitäten werden (doch) nicht geliefert?
     -   eventuell hohe Wartungskosten
--   Bewertung (Risiko: 6, Aufwand: )
+-   Bewertung (Risiko: 6, Aufwand: 3)
+
 
 Reinigungspersonal
 -   Interessen:
+    -   wünscht sich vom Rezeptionspersonal eine zuverlässige Auskunft darüber,
+        welche Zimmer seit wann diese belegt sind
 -   benötigte Funktionen:
+    -   aktuelle Belegung der Zimmer
 -   Sorgen:
--   Bewertung (Risiko: 2, Aufwand: )
+    -   Rezeptionspersonal ist in Einführungsphase der Software nicht
+        auskunftsfähig
+-   Bewertung (Risiko: 1, Aufwand: 4)
+
 
 Buchhaltungspersonal
 -   Interessen:
+    -   wünscht sich eine übersichtliche Darstellung der Tagesumsätze
 -   benötigte Funktionen:
     -   einfaches Buchhaltungssystem
 -   Sorgen:
-    -   
--   Bewertung (Risiko: 3, Aufwand: )
+    -   Umgang mit Anwendung ist schwer erlernbar
+    -   Anwendung ist nicht benutzerfreundlich
+    -   Anwendung arbeitet fachlich nicht korrekt
+    -   Anwendung fällt aus -> Wie arbeite ich dann?
+    -   Buchaltungssystem der Software wird ausgebaut und macht automatisiert
+        Großteile der eigenen Arbeit
+-   Bewertung (Risiko: 3, Aufwand: 4)
+
 
 Gast
 -   Interessen:
+    -   wünscht sich bei der Kommunikation mit dem Rezeptionspersonal eine
+        schnelle und zuverlässige Auskunft zu allen seinen Fragen
+        (Revervierung, Abrechnung, Internet)
 -   benötigte Funktionen:
+    -   n/a bzw. im wesentlichen schon indirekt beim Rezeptionspersonal
+        abgebildet    
 -   Sorgen:
--   Bewertung (Risiko: 2, Aufwand: )
+    -   Rezeptionspersonal ist aufgrund des Umgangs mit der Software nicht
+        fähig, schnell und zuverlässig zu antworten bzw. die eigenen Wünsche
+        zu erfüllen
+-   Bewertung (Risiko: 2, Aufwand: 4)
+
 
 Online-Anbieter Hotelreservierungssystemen
 -   Interessen:
+    -   wünscht sich eine baldige Ankopplung an die MyHotel, um über das eigene
+        Portal noch mehr attraktive Hotelkapazitäten anbieten zu können und
+        dadurch die eigenen Lizenzeinnahmen zu steigern
 -   benötigte Funktionen:
+    -   Schnittstelle zum Abgreifen der Zimmerkapazitäten inkl. Preisauskunft      
 -   Sorgen:
--   Bewertung (Risiko: 1, Aufwand: )
+    -   Anwendung wird ohne online-Schnittstelle gebaut
+-   Bewertung (Risiko: 1, Aufwand: 2)
+
+Prioritäten:
+1) Hotelbesitzer [sqrt(45)]
+2) Rezeptionspersonal [sqrt(29)]
+3) Buchhaltungspersonal [5]
+4) Gast [sqrt(20)]
+5) Reinigungspersonal [sqrt(17)]
+6) Online-Anbieter Hotelreservierungssystem [sqrt(5)]
 
 
 
 Anwendungsfälle
 ----------------
+++  Listendarstellung
+-   Buchungen verwalten
+    -   Buchung machen
+    -   Buchung bearbeiten
+    -   Buchung stornieren
+    -   Liste aller Buchungen anzeigen
+    -   Liste der Buchungen je Kunde anzeigen
+-   Rechnungen verwalten
+    -   Rechnung erstellen
+    -   Rechnung bearbeiten
+    -   Rechnung löschen
+    -   Liste der offenen Rechnungen je Kunde anzeigen
+    -   Liste bezahlte Rechnungen je Kunde anzeigen
+    -   Liste aller offenen Rechnungen anzeigen
+    -   Liste aller bezahlten Rechnungen anzeigen
+-   Kunden verwalten
+    -   Kunden neu anlegen
+    -   Kunden bearbeiten
+    -   Kunden löschen
+    -   Liste aller Kunden anzeigen
+-   Zimmerbelegung anzeigen
+    -   für gegebenen Tag (frei vs belegt)
+    -   je Zimmer für gegebenen Zeitraum (frei vs belegt)
+-   Schlüssel verwalten
+    -   Schlüssel an Kunden ausgeben
+    -   Schlüssel vom Kunden entgegennehmen
+    -   Schlüsselverteilung anzeigen
+-   Tagesumsatz je Kategorie anzeigen
+-   Dienstpläne der Rezeptionsangestellten verwalten
+    -   Dienstplan für alle Rezeptionsangestellten erstellen
+    -   alle Dienstpläne löschen
+-   W-Lan Schlüssel verwalten
+    -   W-Lan Schlüssel erzeugen
+    -   W-Lan Schlüssel löschen
+
+
+++  Detaildarstellung
+
 Name
 Kurzbeschreibung
 Auslöser
