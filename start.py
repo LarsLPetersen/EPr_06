@@ -123,9 +123,9 @@ def shift_plan(employee_list, for_n_weeks = 4):
     for empl in employee_list:
         employee.insert(END, "   " + empl.employee_id.ljust(12) + "     "+
                         "  ".join(
-            k for k in employee_shift(week, employee_list, empl))
-                        + "\n"
-                        )
+                            k for k in employee_shift(
+                                week, employee_list, empl)
+                            ) + "\n")
         
     frame3 = Frame(plan)
     frame3.pack()
@@ -134,10 +134,10 @@ def shift_plan(employee_list, for_n_weeks = 4):
                 "N : Night shift from 22:00 to 6:00",
           height = 4).pack(side = BOTTOM)
 
-    plan.mainloop()
-
     for empl in employee_list:
         print(str(empl))
+        
+    plan.mainloop()
     
     
 def save_shift_plan(employee_list):
@@ -151,7 +151,7 @@ def save_shift_plan(employee_list):
 
         # write the shift plan for each receptionist
         for empl in employee_list:
-            save_as.write(str(empl))
+            save_as.write(str(empl) + "\n")
         save_as.close()
 
         messagebox.showinfo("Saved", "The shift plan has been saved.")
@@ -177,11 +177,10 @@ def main():
     #shift plan options
     shift_menu = Menu(top_menu, tearoff = 0)
     top_menu.add_cascade(label = "Shift Plan", menu = shift_menu)
-##    shift_menu.add_command(label = "Create shift plan",
-##                           command = shift_plan(get_date(),
-##                                                employee_list))
+    shift_menu.add_command(label = "Create shift plan",
+                           command = lambda: shift_plan(employee_list))
     shift_menu.add_command(label = "Save shift plan",
-                           command = save_shift_plan(employee_list))
+                           command = lambda: save_shift_plan(employee_list))
     shift_menu.add_command(label = "Load shift plan",
                            command = load_shift_plan)
 
@@ -189,11 +188,6 @@ def main():
 
     root.config(menu = top_menu)
     root.mainloop()
-
-
-
-
-    
 
 
 if __name__ == "__main__":
