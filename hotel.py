@@ -12,82 +12,85 @@ import datetime
 import sys
 import pickle
 import os.path
+import random
 
 # customized modules
 from actors import *
 
+class Helper:
+    """ """
+    
+    @staticmethod
+    def list_days(start, end):
+        """ """
+        return [start + datetime.timedelta(i) for i in \
+                range((end - start).days + 1)]       
+    
+    
+    @staticmethod
+    def list_nights(start, end):
+        """ """
+        result = []
+        for i in range((end - start).days):
+            result.append([start + datetime.timedelta(i), \
+                           start + datetime.timedelta(i + 1)])
+        return result
 
+        
 class Booking:
     """Represents a booking made by a customer"""
     
-    complete_list = []
-    total_num = 0
-    
-    def __init__(self, customer_id, start, end, room_id):
+    def __init__(self, customer, start, end, room, id):
         """Creates a booking"""
-        self.id = Booking.total_num
-        self.customer_id = customer_id
+        self.id = id
+        self.customer = customer
         self.start = start
         self.end = end
-        self.room_id = room_id
+        self.room = room
         self.is_cancelled = False
         self.is_paid = False
-        self.price = self.get_price(start, end, room_id)
-        Booking.complete_list.append(self)
-        Booking.total_num = len(Booking.complete_list)
         
-    def update(self, start, end, is_cancelled, price, is_paid):
+    def update(self, start, end, room, is_cancelled, price, is_paid):
         """Allows for a modification of the given booking"""
         self.start = start
         self.end = end
+        self.room = room
         self.is_cancelled = is_cancelled
         self.is_paid = is_paid
-        self.id = Booking.total_num
         
-    def get_price(self, start, end, room):
+    def get_price(self):
         """Calculates the preliminary price of the booking
         
-           type(start) = type(end) = datetime.date(y, m , d)
+           type(start) = type(end) = datetime.date(y, m, d)
            type(room) = Room 
         """
-        return (end - start).days() * room.price_per_night 
+        return (self.end - self.start).days * self.room.price_per_night
         
-    def write_to_file():
+    def intersection(self, other):
         """ """
-        pass
+        if not(self.is_cancelled or other.is_cancelled):
+            conflict = set(self.get_days()).intersection(set(other.get_days()))
+            if len(conflict) < 2:
+                return [False, []]
+            else: return [True, list(conflict)]
+        else: return [False, []]
+                
+    def get_days(self):
+        """ """
+        return Helper.list_days(self.start, self.end)
+        
+    def get_nights(self):
+        """ """
+        return Helper.list_nights(self.start, self.end)
+        
     
-    def read_from_file():
-        """ """
-        pass
-        
-            
+    
 class Room:
     """Represents a room in the hotel"""
-    
-    complete_list = []
-    total_num = 0
-    
-    @classmethod
-    def available_rooms(cls_obj, type, begin, end):
-        """Checks which rooms of the given type are available in timeframe"""
-        result = []
-        for room in cls_obj.complete_list:
-            if room.type == type and room.is_available(begin, end)[0]:
-                result.append(room)
-        return result
-    
-    @classmethod
-    def num_rooms(cls_obj, type):
-        """Counts number of rooms of given type """
-        result = 0
-        for room in cls_obj.complete_list:
-            if room.type == type:
-                result += 1
-        return result
-        
-    
-    def __init__(self, type, number, price_per_night, num_keys):
+     
+    def __init__(self, type, number, price_per_night, num_keys, id):
         """Creates a room"""
+        self.id = id
         self.type = type
         self.number = number
         self.price_per_night = price_per_night
@@ -95,70 +98,103 @@ class Room:
         self.num_keys_customer = 0
         self.num_keys_lobby = self.num_keys - self.num_keys_customer
         self.bookings = []
-        self.occupancy = []
-        Room.complete_list.append(self)
-        Room.total_num = len(Room.complete_list)
         
-    def is_available(self, begin, end):
+    def is_available(self, start, end):
         """Checks is given room is available in given timeframe"""
-        result = [True, None]
-        for i in range((end - begin).days - 1):
-            if self.occupancy.__contains__(begin + datetime.timedelta(i)):
-                result = [False, begin + begin + datetime.timedelta(i)]
-                break
-        return result
-    
-    
-    def write_to_file():
+        days = set(Helper.list_days(start, end))
+        conflicts = []
+        for booking in self.bookings:
+            conflict = set(booking.get_days()).intersection(days)
+            if len(conflict) >= 2:
+                conflicts.append(list(conflict))
+        return [True if len(conflicts) == 0 else False, conflicts]
+        
+        
+    def evaluate_occupation(self):
         """ """
-        pass
+        result = []
+        for booking in self.bookings:
+            if not booking.is_cancelled:
+                result.extend(booking.get_nights())
+        return sorted(result)
+        
     
-    def read_from_file():
-        """ """
-        pass    
-
 
 class Hotel:
     """ """
     
     def __init__(self, file_name = None):
-        """ """
+        """Instatiates the fundamental hotel object of the application"""
         if file_name != None:
+            self.file_name = file_name
             self.rooms = self.read_from_file(file_name).rooms
             self.bookings = self.read_from_file(file_name).bookings
             self.customers = self.read_from_file(file_name).customers
             self.receptionists = self.read_from_file(file_name).receptionists
+            self.w_lan_keys = self.read_from_file(file_name).w_lan_keys
+            self.work_plan = self.read_from_file(file_name).work_plan
         else:
-        # create an example skeleton of a hotel"""
+        # create an example"""
+            self.file_name = "Example_Hotel.pkl"
             self.rooms = []
             self.bookings = []
             self.customers = []
             self.receptionists = []
+            self.w_lan_keys = dict()  # {customer1:w_lan_key, ...} 
+            self.work_plan = None
             
-            types = ["single", "double"]
-            num_rooms = [20, 40]
-            prices = [48, 78]
-            num_keys_per_room = [3, 3]
-            num_customers = 7
-            num_receptionists = 5
+            init_types = ["single", "double"]
+            init_num_rooms = [20, 40]
+            init_prices = [48, 78]
+            init_num_keys_per_room = [3, 3]
+            init_num_bookings = 12
+            init_num_customers = 10
+            init_num_receptionists = 5
+            
             # adding single rooms      
-            for i in range(20):
-                self.rooms.append(Room(types[0], str(i + 1), prices[0], num_keys_per_room[0]))
+            for i in range(init_num_rooms[0]):
+                self.rooms.append(Room(init_types[0], str(i + 1),\
+                                       init_prices[0],\
+                                       init_num_keys_per_room[0],\
+                                       i))
             # adding double rooms
-            for i in range(40):
-                self.rooms.append(Room(types[1], str(i + 101), prices[1], num_keys_per_room[1]))
-            # adding customers
-            for i in range(7):
-                self.customers.append(Customer("Vorname_" + str(i), "Nachname_" + str(i)))
-            # adding receptionists    
-            for i in range(5):
-                self.receptionists.append(Receptionist())
+            for i in range(init_num_rooms[1]):
+                self.rooms.append(Room(init_types[1], str(i + 101),\
+                                    init_prices[1], init_num_keys_per_room[1],\
+                                    i + init_num_rooms[0]))
                 
-            self.write_to_file("Example_Hotel.pkl")
+            # adding customers
+            for i in range(init_num_customers):
+                self.customers.append(Customer("Vorname_" + str(i),\
+                                               "Nachname_" + str(i),\
+                                               i))
+            # adding bookings
+            for i in random.sample(range(sum(init_num_rooms)), init_num_bookings):
+                self.customers[random.randrange(0, init_num_customers)].make_booking(\
+                        datetime.date(2017, 1, 1),\
+                        datetime.date(2017, 1, random.randint(2, 15)),\
+                        self.rooms[i],\
+                        self)
+                
+            # adding receptionists    
+            for i in range(init_num_receptionists):
+                self.receptionists.append(Receptionist(i))
+                
+            self.write_to_file()
         
-    def write_to_file(self, file_name):
+    def available_rooms(self, type, start, end):
+        """Checks which rooms of the given type are available in timeframe"""
+        return [room for room in self.rooms if (room.type == type and \
+                room.is_available(start, end)[0])]
+                
+    def update(self):
+        """ """
+        self.write_to_file()
+        self.__init__(self.file_name)
+        
+    def write_to_file(self):
         """Writes hotel example to a pkl-file"""
-        output = open(file_name, "wb")
+        output = open(self.file_name, "wb")
         pickle.dump(self, output)
         output.close()
     
@@ -171,14 +207,20 @@ class Hotel:
             return data
             input.close()
         else:
-            self.write_to_file(file_name, [])
-            return []
+            pass
         
         
 if __name__ == "__main__":
     hotel = Hotel("Example_Hotel.pkl")
-    for room in hotel.rooms:
-        print(room.number, room.price_per_night, room.type)
-    for customer in hotel.customers:
-        print(customer.id, customer.first_name, customer.last_name)
+    
+    #start1 = datetime.date(2017, 1, 1)
+    #end1 = datetime.date(2017, 1, 19)
+    #start2 = datetime.date(2017, 1, 4)
+    #end2 = datetime.date(2017, 1, 19)
+    
+    #for room in hotel.rooms:
+    #    print(room.id, room.bookings)
+    #print(hotel.rooms[4].evaluate_occupation())
+    #print(hotel.rooms[4].is_available(start1, end1))
+    #print([room.id for room in hotel.available_rooms("double", start1, end1)])
     
