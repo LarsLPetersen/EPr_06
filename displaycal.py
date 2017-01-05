@@ -3,7 +3,7 @@ Simple calendar using ttk Treeview together with calendar and datetime
 classes.
 """
 
-__author__ = "5625448: Lilian Mendoza de Sudan, 6xxxx: Lars Petersen"
+__author__ = "5625448: Lilian Mendoza de Sudan, 6290157: Lars Petersen"
 __copyright__ = "Copyright 2015 – stackoverflow.com von fhdrsdg"
 __email__ = "lilian_mendoza@hotmail.com, h.qaderi@rocketmail.com"
 
@@ -37,7 +37,7 @@ class Calendar(ttk.Frame):
             locale, firstweekday, year, month, selectbackground,
             selectforeground
         """
-        # remove custom options from kw before initializating ttk.Frame
+        # remove custom options from kw before initializating frame
         fwday = kw.pop('firstweekday', calendar.MONDAY)
         year = kw.pop('year', self.datetime.now().year)
         month = kw.pop('month', self.datetime.now().month)
@@ -64,8 +64,6 @@ class Calendar(ttk.Frame):
         # insert dates in the currently empty calendar
         self._build_calendar()
 
-        # set the minimal size for the widget
-        self._calendar.bind('<Map>', self.__minsize)
 
     def __setitem__(self, item, value):
         if item in ('year', 'month'):
@@ -104,7 +102,7 @@ class Calendar(ttk.Frame):
         rbtn = ttk.Button(hframe, style='R.TButton', command=self._next_month)
         self._header = ttk.Label(hframe, width=15, anchor='center')
         # the calendar
-        self._calendar = ttk.Treeview(show='', selectmode='none', height=7)
+        self._calendar = ttk.Treeview(self, show='', selectmode='none', height=7)
 
         # pack the widgets
         hframe.pack(in_=self, side='top', pady=4, anchor='center')
@@ -226,9 +224,9 @@ class Calendar(ttk.Frame):
 
 def select_date():
     import sys
-    cal = Tk()
+    cal = Toplevel()
     cal.title('Select a date')
-    ttkcal = Calendar(firstweekday=calendar.MONDAY)
+    ttkcal = Calendar(cal, firstweekday=calendar.MONDAY)
     ttkcal.pack(expand=1, fill='both')
 
     if 'win' not in sys.platform:
@@ -242,6 +240,7 @@ def select_date():
     return x
 
 if __name__ == "__main__":
+
     x = select_date()
 
     while x == None:
