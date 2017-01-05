@@ -18,18 +18,14 @@ from hotel import *
 
 class Customer:
     """  """
-    complete_list = []
-    total_num = 0
     
-    def __init__(self, first_name, last_name, is_active = True):
+    def __init__(self, first_name, last_name, id, is_active = True):
         """ """
-        self.id = Customer.total_num
+        self.id = id
         self.first_name = first_name
         self.last_name = last_name
         self.is_active = is_active
         self.bookings = []
-        Customer.complete_list.append(self)
-        Customer.total_num = len(Customer.complete_list)
         
     def update(self, first_name, last_name, is_active):
         """ """
@@ -37,14 +33,19 @@ class Customer:
         self.last_name = last_name
         self.is_active = is_active
         
-    def make_booking(self, start, end):
+    def make_booking(self, start, end, room, hotel):
         """ """
-        Booking(self.id, start, end)
-        pass
+        booking = Booking(self, start, end, room, len(hotel.bookings))
+        self.bookings.append(booking)
+        room.bookings.append(booking)
+        hotel.bookings.append(booking)
              
-    def cancel_booking(self, booking):
+    def cancel_booking(self, booking, hotel):
         """ """
-        pass
+        if booking not in self.bookings or booking.is_cancelled:
+            pass
+        else:
+            booking.is_cancelled = True
         
     def pay(self, booking):
         """ """
@@ -53,19 +54,8 @@ class Customer:
 
 class Receptionist:
     """ """
-    complete_list = []
-    total_num = 0
-    work_plan = None
     
-    @classmethod
-    def create_work_plan(cls_obj, begin, end):
+    def __init__(self, id):
         """ """
-        pass
-        
-    def __init__(self):
-        """ """
-        self.id = Receptionist.total_num
-        self.shift_plan = ""
-        Receptionist.complete_list.append(self)
-        Receptionist.total_num = len(Receptionist.complete_list)
-        
+        self.id = id
+        self.shift_plan = None
