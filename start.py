@@ -11,9 +11,7 @@ from tkinter import messagebox
 import datetime
 import time
 import random
-#import displaycal
-from displaycal import *
-
+from displaycal import select_date
 
 class Guest(object):
     """Create an hotel guest"""
@@ -38,33 +36,6 @@ class Receptionist(object):
 
         return "{} {}".format(self.employee_id, self.shift)
     
-def get_date():
-    """Retrieve a date from a the calendar."""
-
-    # select a date from the pop-up calendar 
-    #chosen_date = displaycal.select_date()
-    
-    cal = Toplevel()
-    cal.title('Select a date')
-    ttkcal = Calendar(cal, firstweekday=calendar.MONDAY)
-    #ttkcal.pack(expand=1, fill='both')
-
-    if 'win' not in sys.platform:
-        style = ttk.Style()
-        style.theme_use('clam')
-
-    #cal.mainloop()
-
-    chosen_date = ttkcal.selection    
-
-    #return x
-    
-    
-    # or take the current date
-    if not chosen_date:
-        chosen_date = datetime.datetime.today()
-
-    return chosen_date
 
 
 def employee_shift(week, employee_list, empl, for_n_weeks = 4):
@@ -73,7 +44,7 @@ def employee_shift(week, employee_list, empl, for_n_weeks = 4):
     Start from a given date.
     """
 
-    shift = ["--NNNN-", "--EEE--", "LLL---N","NN---EE","FF-LLLL"]
+    shift = ["--NNNN-", "--EEE--", "LLL---N","NN---EE","EE-LLLL"]
 
     # Every five weeks the sequence of the shift will change
     if week % 5 == 0:
@@ -108,13 +79,88 @@ def create_receptionist_list():
     return employee_list
 
     
+def save_shift_plan(employee_list):
+    """Save the current 4-week shift plan to a .txt file."""
+
+    save_as = filedialog.asksaveasfile(mode = "w",
+                                       defaultextension = ".txt")
+
+    # if the save action was not cancelled...
+    if save_as:
+
+        # write the shift plan for each receptionist
+        for empl in employee_list:
+            save_as.write(str(empl) + "\n")
+        save_as.close()
+
+        messagebox.showinfo("Saved", "The shift plan has been saved.")
+
+    else:
+        #if the save action was cancelled, show error
+        messagebox.showerror("", "Save was cancelled")
+        
+        
+def load_shift_plan():
+    pass
+
+##    root.title("My Hotel")
+##
+##    top_menu = Menu(root)
+##
+##    #shift plan options
+##    shift_menu = Menu(top_menu, tearoff = 0)
+##    top_menu.add_cascade(label = "Shift Plan", menu = shift_menu)
+##    shift_menu.add_command(label = "Create shift plan",
+##                           command = lambda: shift_plan(employee_list))
+##    shift_menu.add_command(label = "Save shift plan",
+##                           command = lambda: save_shift_plan(employee_list))
+##    shift_menu.add_command(label = "Load shift plan",
+##                           command = load_shift_plan)
+##
+##    root.config(menu = top_menu)
+##    root.mainloop()
+
+class MyHotel():
+    
+    def __init__(self, root, employee_list):
+
+        self.root = root
+        self.employee_list = employee_list
+        self.root.title("My Hotel")
+
+        self.top_menu = Menu(self.root)
+        self.shift_menu = Menu(self.top_menu, tearoff = 0)
+        self.top_menu.add_cascade(label = "Shift Plan", menu = self.shift_menu)
+        self.shift_menu.add_command(label = "Create shift plan",
+                           command = lambda: shift_plan(self.employee_list))
+        self.shift_menu.add_command(label = "Save shift plan",
+                           command = lambda: save_shift_plan(self.employee_list))
+        self.shift_menu.add_command(label = "Load shift plan",
+                           command = load_shift_plan)
+
+        self.root.config(menu = self.top_menu)
+
+
+def get_date():
+    """Retrieve a date from a the calendar."""
+
+    # select a date from the pop-up calendar from the module displaycal.py
+   
+    chosen_date = select_date()
+
+    # or take the current date
+    if not chosen_date:
+        chosen_date = datetime.datetime.today()
+
+    return chosen_date
+
+    
 def shift_plan(employee_list, for_n_weeks = 4):
     """Summarize the shift plan for all employees for n weeks."""
 
     week = get_date().isocalendar()[1]
     
-    #plan = Tk()
-    plan = Toplevel()
+    plan = Tk()
     plan.title("Shift plan")
 
     end_week = 52 if (week + for_n_weeks -1) % 52 == 0 \
@@ -158,57 +204,17 @@ def shift_plan(employee_list, for_n_weeks = 4):
         
     plan.mainloop()
     
-    
-def save_shift_plan(employee_list):
-    """Save the current 4-week shift plan to a .txt file."""
 
-    save_as = filedialog.asksaveasfile(mode = "w",
-                                       defaultextension = ".txt")
-
-    # if the save action was not cancelled...
-    if save_as:
-
-        # write the shift plan for each receptionist
-        for empl in employee_list:
-            save_as.write(str(empl) + "\n")
-        save_as.close()
-
-        messagebox.showinfo("Saved", "The shift plan has been saved.")
-
-    else:
-        #if the save action was cancelled, show error
-        messagebox.showerror("", "Save was cancelled")
-        
-        
-def load_shift_plan():
-    pass
     
 def main():
     """Run the program."""
 
     employee_list = create_receptionist_list()
-    
-    global root
+
+#    global root
     root = Tk()
-    root.title("My Hotel")
+    main_window = MyHotel(root, employee_list)
 
-    top_menu = Menu(root)
-
-    #shift plan options
-    shift_menu = Menu(top_menu, tearoff = 0)
-    top_menu.add_cascade(label = "Shift Plan", menu = shift_menu)
-    shift_menu.add_command(label = "Create shift plan",
-                           command = lambda: shift_plan(employee_list))
-    shift_menu.add_command(label = "Save shift plan",
-                           command = lambda: save_shift_plan(employee_list))
-    shift_menu.add_command(label = "Load shift plan",
-                           command = load_shift_plan)
-
-    
-
-    root.config(menu = top_menu)
-    root.mainloop()
-
-
+   
 if __name__ == "__main__":
     main()
