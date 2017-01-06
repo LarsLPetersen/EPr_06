@@ -1,4 +1,4 @@
-""" ... """
+"""Contains the main internal classes Hotel, Room, Booking and Bill."""
 
 __author__ = "5625448: Lilian Mendoza de Sudan, 6290157: Lars Petersen"
 __copyright__ = ""
@@ -11,59 +11,91 @@ import time
 import datetime
 import sys
 import pickle
-import os.path
+import os, os.path
 import random
+import string
 
 # customized modules
 from actors import *
 
-class Helper:
-    """ """
-    
-    @staticmethod
-    def list_days(start, end):
-        """ """
-        return [start + datetime.timedelta(i) for i in \
-                range((end - start).days + 1)]       
-    
-    
-    @staticmethod
-    def list_nights(start, end):
-        """ """
-        result = []
-        for i in range((end - start).days):
-            result.append([start + datetime.timedelta(i), \
-                           start + datetime.timedelta(i + 1)])
-        return result
 
+MSG_CANCEL_BILL_OK = "Die Rechnung wurde storniert."
+MSG_CANCEL_BILL_FAIL = "Die Rechnung konnte nicht storniert werden."
+MSG_INTERSECTION_EMPTY = "Es gibt keine Überschneidung."
+
+def list_days(start, end):
+    """Returns the list of all days from start-day to end-day."""
+    return [start + datetime.timedelta(i) for i in \
+            range((end - start).days + 1)]       
+
+
+def list_nights(start, end):
+    """Lists all nights [day_before, day_after] from start-day to end-day."""
+    result = []
+    for i in range((end - start).days):
+        result.append([start + datetime.timedelta(i), \
+                       start + datetime.timedelta(i + 1)])
+    return result
+
+class Key:
+    """ """
+    def __init__(self, id, room, guest = None):
+        """ """
+        self.id = id
+        self.room = room
+        self.guest = guest
         
-class Booking:
-    """Represents a booking made by a customer"""
+                
+class Bill:
+    """Represents a bill derived from a booking."""
     
-    def __init__(self, customer, start, end, room, id):
+    def __init__(self, guest, booking, id):
+        """Creates a bill for a given guest and a given booking."""
+        self.id = id
+        self.guest = guest
+        self.booking = booking
+        self.value = booking.price
+        self.is_cancelled = False
+        self.pay_date = None
+        
+    def update_price(self, price):
+        """Allows to modify the price of the given booking."""
+        self.price = price
+        
+    def cancel(self):
+        """Allows to cancel the bill."""
+        if self.is_cancelled:
+            return [False, MSG_CANCEL_BILL_FAIL]
+        else:
+            self.is_cancelled = True
+            return [True, MSG_CANCEL_BILL_OK]
+        
+            
+class Booking:
+    """Represents a booking made by a guest."""
+    
+    def __init__(self, guest, start, end, room, id):
         """Creates a booking"""
         self.id = id
-        self.customer = customer
+        self.guest = guest
         self.start = start
         self.end = end
         self.room = room
+        self.price = self.get_price()
+        self.wlan_key = self.generate_wlan_key()
         self.is_cancelled = False
-        self.is_paid = False
+        self.is_billed = False
         
-    def update(self, start, end, room, is_cancelled, price, is_paid):
+    def update(self, start, end, room, is_cancelled, price, is_billed):
         """Allows for a modification of the given booking"""
         self.start = start
         self.end = end
         self.room = room
         self.is_cancelled = is_cancelled
-        self.is_paid = is_paid
+        self.is_billed = is_billed
         
     def get_price(self):
-        """Calculates the preliminary price of the booking
-        
-           type(start) = type(end) = datetime.date(y, m, d)
-           type(room) = Room 
-        """
+        """Calculates the preliminary price of the booking."""
         return (self.end - self.start).days * self.room.price_per_night
         
     def intersection(self, other):
@@ -71,37 +103,42 @@ class Booking:
         if not(self.is_cancelled or other.is_cancelled):
             conflict = set(self.get_days()).intersection(set(other.get_days()))
             if len(conflict) < 2:
-                return [False, []]
+                return [False, MSG_INTERSECTION_EMPTY]
             else: return [True, list(conflict)]
-        else: return [False, []]
+        else: return [False, MSG_INTERSECTION_EMPTY]
                 
     def get_days(self):
-        """ """
-        return Helper.list_days(self.start, self.end)
+        """Returns the list of the days covered by this booking."""
+        return list_days(self.start, self.end)
         
     def get_nights(self):
-        """ """
-        return Helper.list_nights(self.start, self.end)
+        """Returns the list of the nights covered by this booking."""
+        return list_nights(self.start, self.end)
         
-    
-    
+    def generate_wlan_key(self, size = 10):
+        """Returns the list of the days covered by this booking."""
+        preface = str(self.room.id)
+        characters = string.ascii_letters + string.punctuation + string.digits
+        random_part = "".join(random.choice(characters) for _ in range(size))
+        return preface + random_part
+        
+        
 class Room:
-    """Represents a room in the hotel"""
+    """Represents a room in the hotel."""
      
     def __init__(self, type, number, price_per_night, num_keys, id):
-        """Creates a room"""
+        """Creates a room."""
         self.id = id
         self.type = type
         self.number = number
         self.price_per_night = price_per_night
         self.num_keys = num_keys
-        self.num_keys_customer = 0
-        self.num_keys_lobby = self.num_keys - self.num_keys_customer
         self.bookings = []
+        self.bookings_by_id = {}
         
     def is_available(self, start, end):
-        """Checks is given room is available in given timeframe"""
-        days = set(Helper.list_days(start, end))
+        """Checks if the given room is available within the given timeframe."""
+        days = set(list_days(start, end))
         conflicts = []
         for booking in self.bookings:
             conflict = set(booking.get_days()).intersection(days)
@@ -109,76 +146,93 @@ class Room:
                 conflicts.append(list(conflict))
         return [True if len(conflicts) == 0 else False, conflicts]
         
-        
     def evaluate_occupation(self):
-        """ """
+        """Lists all the nights for which this room is booked."""
         result = []
         for booking in self.bookings:
             if not booking.is_cancelled:
                 result.extend(booking.get_nights())
         return sorted(result)
         
-    
+INIT_TYPES = ["single", "double"]
+INIT_NUM_ROOMS = [20, 40]
+INIT_PRICES = [48, 78]
+INIT_NUM_KEYS_PER_ROOM = [3, 3]
+INIT_NUM_BOOKINGS = 12
+INIT_NUM_GUESTS = 10
+INIT_NUM_RECEPTIONISTS = 5    
 
 class Hotel:
-    """ """
+    """Represents the main object hotel."""
     
     def __init__(self, file_name = None):
-        """Instatiates the fundamental hotel object of the application"""
+        """Instatiates the fundamental hotel object of the application."""
         if file_name != None:
             self.file_name = file_name
             self.rooms = self.read_from_file(file_name).rooms
+            self.rooms_by_id = self.read_from_file(file_name).rooms_by_id
             self.bookings = self.read_from_file(file_name).bookings
-            self.customers = self.read_from_file(file_name).customers
+            self.bookings_by_id = self.read_from_file(file_name).bookings_by_id
+            self.bills = self.read_from_file(file_name).bills
+            self.bills_by_id = self.read_from_file(file_name).bills_by_id
+            self.guests = self.read_from_file(file_name).guests
+            self.guests_by_id = self.read_from_file(file_name).guests_by_id
             self.receptionists = self.read_from_file(file_name).receptionists
-            self.w_lan_keys = self.read_from_file(file_name).w_lan_keys
+            self.receptionists_by_id = \
+                    self.read_from_file(file_name).receptionists_by_id
             self.work_plan = self.read_from_file(file_name).work_plan
+            self.key_table = self.read_from_file(file_name).key_table
         else:
-        # create an example"""
+        # create an example
             self.file_name = "Example_Hotel.pkl"
             self.rooms = []
+            self.rooms_by_id = {}
             self.bookings = []
-            self.customers = []
+            self.bookings_by_id = {}
+            self.bills = []
+            self.bills_by_id = {}
+            self.guests = []
+            self.guests_by_id = {}
             self.receptionists = []
-            self.w_lan_keys = dict()  # {customer1:w_lan_key, ...} 
-            self.work_plan = None
+            self.receptionists_by_id = {}
+            self.work_plan = {}
+            self.key_table = {}
             
-            init_types = ["single", "double"]
-            init_num_rooms = [20, 40]
-            init_prices = [48, 78]
-            init_num_keys_per_room = [3, 3]
-            init_num_bookings = 12
-            init_num_customers = 10
-            init_num_receptionists = 5
             
             # adding single rooms      
-            for i in range(init_num_rooms[0]):
-                self.rooms.append(Room(init_types[0], str(i + 1),\
-                                       init_prices[0],\
-                                       init_num_keys_per_room[0],\
-                                       i))
-            # adding double rooms
-            for i in range(init_num_rooms[1]):
-                self.rooms.append(Room(init_types[1], str(i + 101),\
-                                    init_prices[1], init_num_keys_per_room[1],\
-                                    i + init_num_rooms[0]))
+            for i in range(INIT_NUM_ROOMS[0]):
+                room = Room(INIT_TYPES[0], str(i + 1), INIT_PRICES[0],\
+                                       INIT_NUM_KEYS_PER_ROOM[0],i)
+                self.rooms.append(room)
+                self.rooms_by_id[i] = room
                 
-            # adding customers
-            for i in range(init_num_customers):
-                self.customers.append(Customer("Vorname_" + str(i),\
-                                               "Nachname_" + str(i),\
-                                               i))
+            # adding double rooms
+            for i in range(INIT_NUM_ROOMS[1]):
+                room = Room(INIT_TYPES[1], str(i + 1), INIT_PRICES[1],\
+                                       INIT_NUM_KEYS_PER_ROOM[1],i)
+                self.rooms.append(room)
+                self.rooms_by_id[i] = room
+                
+            # adding guests
+            for i in range(INIT_NUM_GUESTS):
+                guest = Guest("Vorname_" + str(i), "Nachname_" + str(i), i)
+                self.guests.append(guest)
+                self.guests_by_id[i] = guest
+                
             # adding bookings
-            for i in random.sample(range(sum(init_num_rooms)), init_num_bookings):
-                self.customers[random.randrange(0, init_num_customers)].make_booking(\
+            for i in random.sample(range(sum(INIT_NUM_ROOMS)),\
+                                                            INIT_NUM_BOOKINGS):
+                self.guests[random.randrange(0, INIT_NUM_GUESTS)].make_booking(\
                         datetime.date(2017, 1, 1),\
                         datetime.date(2017, 1, random.randint(2, 15)),\
                         self.rooms[i],\
                         self)
                 
             # adding receptionists    
-            for i in range(init_num_receptionists):
-                self.receptionists.append(Receptionist(i))
+            for i in range(INIT_NUM_RECEPTIONISTS):
+                receptionist = Receptionist(i)
+                self.receptionists.append(receptionist)
+                self.receptionists_by_id[i] = receptionist
                 
             self.write_to_file()
         
@@ -187,32 +241,101 @@ class Hotel:
         return [room for room in self.rooms if (room.type == type and \
                 room.is_available(start, end)[0])]
                 
+    def get_revenue(self, date):
+        """Computes the revenue (by actual payments) made on the given date."""
+        return list(map(sum, [bill.value for bill in self.bills \
+                                                    if bill.pay_date == date]))
+
     def update(self):
-        """ """
+        """Saves current changes on the hotel and re-creates it."""
         self.write_to_file()
         self.__init__(self.file_name)
         
     def write_to_file(self):
-        """Writes hotel example to a pkl-file"""
+        """Saves the hotel object in a pkl-file."""
         output = open(self.file_name, "wb")
         pickle.dump(self, output)
         output.close()
     
     def read_from_file(self, file_name):
-        """Reads entries from a saved hotel into an object"""
-        
+        """Reads entries from a saved hotel into an object."""
         if os.path.isfile(file_name):
             input = open(file_name, "rb")
             data = pickle.load(input)
             return data
             input.close()
-        else:
-            pass
-        
-        
-if __name__ == "__main__":
-    hotel = Hotel("Example_Hotel.pkl")
+        else: pass
     
+    def initiate_key_table(self):
+        """ """
+        # key-disitribution: [num of keys with guests, [guests with keys]]
+        key_table = dict.fromkeys(self.rooms_by_id.keys(), [0, []])
+        self.key_table = key_table
+        
+        
+    def generate_shift_plans(self, week, num_weeks = 4):
+        """Create the num_weeks work plan for the receptionists.
+
+        Start from a given date.
+        """
+        pattern = ["--NNNN-", "--FFF--", "SSS---N","NN---FF", "FF-SSSS"]
+
+        for id in self.receptionists_by_id.keys():
+            self.receptionists_by_id[id].shift_plan = ""
+            for j in range(num_weeks):
+                # get the week shift sequence for an employee j
+                week_shift = pattern[((week - 1 + j) + id) % 5]
+                # adds the next weeks' sequences
+                self.receptionists_by_id[id].shift_plan += week_shift
+            self.work_plan[id] = self.receptionists_by_id[id].shift_plan
+        
+    def short_info(self):
+        """Yields info on the bookings of the hotel (auxiliary function)"""
+        return [[booking.id, booking.guest.id, booking.room.id, str(booking.start), 
+                 str(booking.end)] for booking in self.bookings]
+
+                
+if __name__ == "__main__":
+    mode = 0
+    file_name = "Example_Hotel.pkl"
+    
+    if mode == 1:
+        if os.path.isfile(file_name):
+            os.remove(file_name)
+        hotel = Hotel()
+        hotel.update()
+        sys.exit()
+    
+    hotel = Hotel(file_name)    
+    #print(hotel.short_info())
+    
+    #hotel.generate_shift_plans(datetime.date.today().isocalendar()[1])
+    #print(hotel.work_plan)
+    hotel.initiate_key_table()
+    hotel.receptionists_by_id[0].handout_keys(hotel.guests_by_id[0], hotel.rooms_by_id[2], 1, hotel)
+    print(hotel.key_table)
+    
+    #hotel.update()
+    #for receptionist in hotel.receptionists_by_id.values():
+    #    print(receptionist.__str__())
+    #print
+    #hotel.receptionists_by_id[1].bill(hotel.guests[6].bookings_by_id[0], hotel)
+    #hotel.update()
+    #print(hotel.bills_by_id)
+    #print(hotel.bills_by_id[1].guest.id)
+    #for key in hotel.guests_by_id.keys():
+    #    print(key, hotel.guests_by_id[key].bills)
+    
+    #hotel.guests[6].pay(hotel.bills_by_id[], datetime.date.today(), hotel)
+    #print(len(hotel.bills))
+    #hotel.update()
+    #print(hotel.get_revenue(datetime.date(2017,1,1)))
+    
+    #for booking in hotel.bookings:
+        
+    #    print(booking.wlan_key)
+    
+    #hotel.update()
     #start1 = datetime.date(2017, 1, 1)
     #end1 = datetime.date(2017, 1, 19)
     #start2 = datetime.date(2017, 1, 4)
