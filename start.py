@@ -11,7 +11,9 @@ from tkinter import messagebox
 import datetime
 import time
 import random
-import displaycal
+#import displaycal
+from displaycal import *
+
 
 class Guest(object):
     """Create an hotel guest"""
@@ -40,8 +42,24 @@ def get_date():
     """Retrieve a date from a the calendar."""
 
     # select a date from the pop-up calendar 
-    chosen_date = displaycal.select_date()
+    #chosen_date = displaycal.select_date()
+    
+    cal = Toplevel()
+    cal.title('Select a date')
+    ttkcal = Calendar(cal, firstweekday=calendar.MONDAY)
+    #ttkcal.pack(expand=1, fill='both')
 
+    if 'win' not in sys.platform:
+        style = ttk.Style()
+        style.theme_use('clam')
+
+    #cal.mainloop()
+
+    chosen_date = ttkcal.selection    
+
+    #return x
+    
+    
     # or take the current date
     if not chosen_date:
         chosen_date = datetime.datetime.today()
@@ -95,7 +113,8 @@ def shift_plan(employee_list, for_n_weeks = 4):
 
     week = get_date().isocalendar()[1]
     
-    plan = Tk()
+    #plan = Tk()
+    plan = Toplevel()
     plan.title("Shift plan")
 
     end_week = 52 if (week + for_n_weeks -1) % 52 == 0 \
@@ -169,6 +188,7 @@ def main():
 
     employee_list = create_receptionist_list()
     
+    global root
     root = Tk()
     root.title("My Hotel")
 
