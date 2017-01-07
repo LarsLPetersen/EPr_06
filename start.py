@@ -48,12 +48,123 @@ def load_shift_plan():
 
 
 
+class StartDate:
+    """Window for ..."""
+    
+    def __init__(self, parent):
+        """Creates the SearchChoice-Window"""
+        self.root = tk.Toplevel()
+        self.container = tk.LabelFrame(self.root, text = "Geben Sie das "\
+                                       "Anreisedatum ein")
+        self.container.pack()
+        self.parent = parent
+        
+        entry = tk.StringVar()
+        entry.set(parent.start)
+        
+        self.entry = tk.Entry(self.container, textvariable = entry)
+        self.entry.pack()
+        
+        self.button = tk.Button(self.container, text = "Weiter", \
+                command = lambda: self.get_date(parent, entry))
+        self.button.pack()
+
+    def close_window(self):
+        self.root.destroy()
+    
+    def get_date(self, parent, entry):
+        """Performs ..."""
+        parent.start = entry.get()
+        
+        if parent.start == "":
+            self.entry.configure(bg = "yellow")
+            messagebox.showwarning("Unvollständig!",
+                                   "Bitte füllen Sie das Feld aus!")
+        else:
+            try:
+                x = strptime(parent.start, '%d.%m.%Y')
+                x = datetime.date(*(x[0:3]))
+                self.entry.configure(bg = "white")
+
+                if x < datetime.date.today():
+                    self.entry.configure(bg = "yellow")
+                    messagebox.showwarning("Fehler", "Das Datum "
+                                           "liegt in der Vergangenheit!")
+                else:
+                    parent.start = x
+                    self.close_window()
+
+            except ValueError:
+                self.entry.configure(bg = "yellow")
+                messagebox.showwarning("Fehler!", "Bitte geben Sie "
+                                       "ein gültiges Datum ein!"
+                                       "\n tt.mm.jjjj")        
+    
+class EndDate:
+    """Window for choosing a start date"""
+    
+    def __init__(self, parent):
+        """Creates the start date-Window"""
+        
+        self.root = tk.Toplevel()
+        self.container = tk.LabelFrame(self.root, text = "Geben Sie das "\
+                                       "Abreisedatum ein")
+        self.container.pack()
+        self.parent = parent
+        
+        entry = tk.StringVar()
+        entry.set(parent.end)
+        
+        self.entry = tk.Entry(self.container, textvariable = entry)
+        self.entry.pack()
+        
+        self.button = tk.Button(self.container, text = "Weiter", \
+                command = lambda: self.get_date(parent, entry))
+        self.button.pack()
+
+    def close_window(self):
+        self.root.destroy()
+    
+    def get_date(self, parent, entry):
+        """Performs ..."""
+        parent.end = entry.get()
+        
+        if parent.start == "":
+            self.entry.configure(bg = "yellow")
+            messagebox.showwarning("Unvollständig!",
+                                   "Bitte füllen Sie das Feld aus!")
+        else:
+            try:
+                y = strptime(parent.end, '%d.%m.%Y')
+                y = datetime.date(*(y[0:3]))
+                self.entry.configure(bg = "white")
+
+                if y < datetime.date.today():
+                    self.entry.configure(bg = "yellow")
+                    messagebox.showwarning("Fehler", "Das Datum "
+                                           "liegt in der Vergangenheit!")
+
+                elif y < parent.start:
+                    self.entry.configure(bg = "yellow")
+                    messagebox.showwarning("Fehler", "Das Abreisedatum "
+                                           "liegt vor dem Anreisedatum!")
+                else:
+                    parent.end = y
+                    self.close_window()
+
+            except ValueError:
+                self.entry.configure(bg = "yellow")
+                messagebox.showwarning("Fehler!", "Bitte geben Sie "
+                                       "ein gültiges Datum ein!"
+                                       "\n tt.mm.jjjj")        
+
+
 class MyHotel:
     
     def __init__(self):
 
-        self.start = "dd.mm.jjjjstart"
-        self.end = "end"
+        self.start = "dd.mm.jjjj"
+        self.end = "dd.mm.jjjj"
         
         self.root = tk.Tk()
 
@@ -98,7 +209,7 @@ class MyHotel:
         self.scroll1.config (command = self.select1.yview)
         self.scroll1.pack(side = "right", fill = "y")
         self.select1.pack(side = "right", fill = "both")
-        self.select1.bind("<Double-1>", lambda x: self.load_booking())
+        self.select1.bind("<Double-1>", self.load_booking)
         
         self.frame1b = tk.Frame(self.group1)
         self.frame1b.pack()
@@ -109,7 +220,7 @@ class MyHotel:
                     command = self.cancel_booking)
         b2.pack(side = "left")
         b3 = tk.Button(self.frame1b, text ="Neue Buchung",
-                    command = lambda: self.new_booking)
+                    command = self.new_booking)
         b3.pack(side = "left")
         b4 = tk.Button(self.frame1b, text = "Rechnung",
                     command = self.print_bill)
@@ -223,8 +334,8 @@ class MyHotel:
         pass
 
     def new_booking(self):
-        enter_dialog = StartDate(self)
-        enter_dialog = EndDate(self)
+        enter_dialog1 = StartDate(self)
+        enter_dialog2 = EndDate(self)
 
 
     def print_bill(self):
@@ -241,117 +352,6 @@ class MyHotel:
 
     def pay_bill(self):
         pass
-
-
-class StartDate:
-    """Window for ..."""
-    
-    def __init__(self, parent):
-        """Creates the SearchChoice-Window"""
-        self.root = tk.Toplevel()
-        self.container = tk.LabelFrame(self.root, text = "Geben Sie das "\
-                                       "Anreisedatum ein")
-        self.container.pack()
-        self.parent = parent
-        
-        entry = tk.StringVar()
-        entry.set(parent.start)
-        
-        self.entry = tk.Entry(self.container, textvariable = entry)
-        self.entry.pack()
-        
-        self.button = tk.Button(self.container, text = "Weiter", \
-                command = lambda: self.get_date(parent, entry))
-        self.button.pack()
-
-    def close_window(self):
-        self.root.destroy()
-    
-    def get_date(self, parent, entry):
-        """Performs ..."""
-        parent.start = entry.get()
-        
-        if parent.start == "":
-            self.entry.configure(bg = "yellow")
-            messagebox.showwarning("Unvollständig!",
-                                   "Bitte füllen Sie das Feld aus!")
-        else:
-            try:
-                x = strptime(parent.start, '%d.%m.%Y')
-                x = datetime.date(*(x[0:3]))
-                self.entry.configure(bg = "white")
-
-                if x < datetime.date.today():
-                    self.entry.configure(bg = "yellow")
-                    messagebox.showwarning("Fehler", "Das Datum "
-                                           "liegt in der Vergangenheit!")
-                else:
-                    parent.start = x
-                    self.close_window()
-
-            except ValueError:
-                self.entry.configure(bg = "yellow")
-                messagebox.showwarning("Fehler!", "Bitte geben Sie "
-                                       "ein gültiges Datum ein!"
-                                       "\n tt.mm.jjjj")        
-    
-class EndDate:
-    """Window for choosing a start date"""
-    
-    def __init__(self, parent):
-        """Creates the start date-Window"""
-        
-        self.root = tk.Toplevel()
-        self.container = tk.LabelFrame(self.root, text = "Geben Sie das "\
-                                       "Abreisedatum ein")
-        self.container.pack()
-        self.parent = parent
-        
-        entry = tk.StringVar()
-        entry.set(parent.end)
-        
-        self.entry = tk.Entry(self.container, textvariable = entry)
-        self.entry.pack()
-        
-        self.button = tk.Button(self.container, text = "Weiter", \
-                command = lambda: self.get_date(parent, entry))
-        self.button.pack()
-
-    def close_window(self):
-        self.root.destroy()
-    
-    def get_date(self, parent, entry):
-        """Performs ..."""
-        parent.end = entry.get()
-        
-        if parent.start == "":
-            self.entry.configure(bg = "yellow")
-            messagebox.showwarning("Unvollständig!",
-                                   "Bitte füllen Sie das Feld aus!")
-        else:
-            try:
-                y = strptime(parent.end, '%d.%m.%Y')
-                y = datetime.date(*(y[0:3]))
-                self.entry.configure(bg = "white")
-
-                if y < datetime.date.today():
-                    self.entry.configure(bg = "yellow")
-                    messagebox.showwarning("Fehler", "Das Datum "
-                                           "liegt in der Vergangenheit!")
-
-                elif y < parent.start:
-                    self.entry.configure(bg = "yellow")
-                    messagebox.showwarning("Fehler", "Das Abreisedatum "
-                                           "liegt vor dem Anreisedatum!")
-                else:
-                    parent.end = y
-                    self.close_window()
-
-            except ValueError:
-                self.entry.configure(bg = "yellow")
-                messagebox.showwarning("Fehler!", "Bitte geben Sie "
-                                       "ein gültiges Datum ein!"
-                                       "\n tt.mm.jjjj")        
 
     
 ##def shift_plan(employee_list, for_n_weeks = 4):
