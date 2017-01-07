@@ -15,11 +15,14 @@ import pickle
 # customized modules
 from hotel import *
 
+
+# constants for user information
 MSG_CANCEL_BOOKING_OK = "Die Buchung wurde storniert."
 MSG_CANCEL_BOOKING_FAIL = "Die Buchung konnte nicht storniert werden."
 MSG_PAY_BILL_OK = "Die Rechnung wurde bezahlt."
 MSG_PAY_BILL_FAIL = "Die Rechnung konnte nicht bezahlt werden."
 MSG_KEY_FAIl = "Diese Anzahl an Schlüsseln kann nicht ausgegeben werden."
+
 
 class Guest:
     """Represents a usual guest of the hotel."""
@@ -30,9 +33,7 @@ class Guest:
         self.first_name = first_name
         self.last_name = last_name
         self.is_active = is_active
-        self.bookings = []
         self.bookings_by_id = {}
-        self.bills = []
         self.bills_by_id = {}
         
     def update(self, first_name, last_name, is_active):
@@ -43,17 +44,14 @@ class Guest:
         
     def make_booking(self, start, end, room, hotel):
         """Allows the guest to make a booking."""
-        booking = Booking(self, start, end, room, len(hotel.bookings))
-        self.bookings.append(booking)
-        self.bookings_by_id[len(hotel.bookings)] = booking
-        room.bookings.append(booking)
-        room.bookings_by_id[len(hotel.bookings)] = booking
-        hotel.bookings.append(booking)
-        hotel.bookings_by_id[len(hotel.bookings)] = booking
+        booking = Booking(self, start, end, room, len(hotel.bookings_by_id))
+        self.bookings_by_id[len(hotel.bookings_by_id)] = booking
+        room.bookings_by_id[len(hotel.bookings_by_id)] = booking
+        hotel.bookings_by_id[len(hotel.bookings_by_id)] = booking
              
     def cancel_booking(self, booking):
         """Allows the guest to cancel one of his bookings."""
-        if booking not in self.bookings:
+        if booking.id not in self.bookings_by_id:
             return [False, MSG_CANCEL_BOOKING_FAIL]
         elif booking.is_cancelled:
             return [False, MSG_CANCEL_BOOKING_FAIL]
@@ -63,23 +61,22 @@ class Guest:
             
     def pay(self, bill, date, hotel):
         """Allows the guest to pay one of his bills."""
-        if bill not in self.bill:
+        if bill.id not in self.bills_by_id:
             return [False, MSG_PAY_BILL_FAIL]
         elif bill.is_cancelled:
             return [False, MSG_PAY_BILL_FAIL]
         else:
             bill.pay_date = date
-            bill.is_paid = True
             return [True, MSG_PAY_BILL_OK]
             
         
 class Receptionist:
     """Represents a receptionist of the hotel."""
     
-    def __init__(self, id, shift_plan = ""):
+    def __init__(self, id):
         """Creates a receptionist."""
         self.id = id
-        self.shift_plan = shift_plan
+        self.shift_plan = ""
         
     def __str__(self):
         """Print receptionist's data."""
@@ -88,11 +85,10 @@ class Receptionist:
      
     def bill(self, booking, hotel):
         """Allows the receptionist to bill one of the bookings."""
-        bill = Bill(booking.guest, booking, len(hotel.bills))
-        booking.guest.bills.append(bill)
-        booking.guest.bills_by_id[len(hotel.bills)] = bill
-        hotel.bills.append(bill)
-        hotel.bills_by_id[len(hotel.bills)] = bill
+        id = len(hotel.bills_by_id)
+        bill = Bill(booking.guest, booking, id)
+        booking.guest.bills_by_id[id] = bill
+        hotel.bills_by_id[id] = bill
         
     def handout_keys(self, guest, room, num, hotel):
         """Hand out a key to the guest for a given room."""
