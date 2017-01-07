@@ -152,9 +152,9 @@ Anwendungsfälle
 -   Rechnungen verwalten
     -   Rechnung erstellen
     -   Rechnung bearbeiten
-    -   Rechnung löschen
+    -   Rechnung stornieren
     -   Liste der offenen Rechnungen je Kunde anzeigen
-    -   Liste bezahlte Rechnungen je Kunde anzeigen
+    -   Liste der bezahlten Rechnungen je Kunde anzeigen
     -   Liste aller offenen Rechnungen anzeigen
     -   Liste aller bezahlten Rechnungen anzeigen
 -   Kunden verwalten
@@ -175,7 +175,6 @@ Anwendungsfälle
     -   alle Dienstpläne löschen
 -   W-Lan Schlüssel verwalten
     -   W-Lan Schlüssel erzeugen
-    -   W-Lan Schlüssel löschen
 
 
 ++  Detaildarstellung
