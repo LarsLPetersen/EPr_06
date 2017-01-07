@@ -254,7 +254,7 @@ class StartDate:
         self.container.pack()
         self.parent = parent
         
-        entry = tk.tk.StringVar()
+        entry = tk.StringVar()
         entry.set(parent.start)
         
         self.entry = tk.Entry(self.container, textvariable = entry)
@@ -331,7 +331,7 @@ class EndDate:
         else:
             try:
                 y = strptime(parent.end, '%d.%m.%Y')
-                y = datetime.date(*(x[0:3]))
+                y = datetime.date(*(y[0:3]))
                 self.entry.configure(bg = "white")
 
                 if y < datetime.date.today():
@@ -344,7 +344,7 @@ class EndDate:
                     messagebox.showwarning("Fehler", "Das Abreisedatum "
                                            "liegt vor dem Anreisedatum!")
                 else:
-                    parent.end = x
+                    parent.end = y
                     self.close_window()
 
             except ValueError:
