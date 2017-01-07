@@ -60,7 +60,7 @@ class StartDate:
         self.parent = parent
         
         entry = tk.StringVar()
-        entry.set(parent.start)
+        entry.set("dd.mm.jjjj")
         
         self.entry = tk.Entry(self.container, textvariable = entry)
         self.entry.pack()
@@ -113,7 +113,7 @@ class EndDate:
         self.parent = parent
         
         entry = tk.StringVar()
-        entry.set(parent.end)
+        entry.set("dd.mm.jjjj")
         
         self.entry = tk.Entry(self.container, textvariable = entry)
         self.entry.pack()
