@@ -19,7 +19,7 @@ MSG_CANCEL_BOOKING_OK = "Die Buchung wurde storniert."
 MSG_CANCEL_BOOKING_FAIL = "Die Buchung konnte nicht storniert werden."
 MSG_PAY_BILL_OK = "Die Rechnung wurde bezahlt."
 MSG_PAY_BILL_FAIL = "Die Rechnung konnte nicht bezahlt werden."
-
+MSG_KEY_FAIl = "Diese Anzahl an Schlüsseln kann nicht ausgegeben werden."
 
 class Guest:
     """Represents a usual guest of the hotel."""
@@ -99,17 +99,24 @@ class Receptionist:
         if hotel.key_table[room.id][0] + num >= 3:
             return [False, MSG_KEY_FAIL]
         else:
-           hotel.key_table[room.id][0] += num
-           hotel.key_table[room.id][1].append(guest.id)
-           return [True, None]
+            try:
+                hotel.key_table[room.id][1][guest.id] += num
+            except KeyError:
+                hotel.key_table[room.id][1][guest.id] = num
+            hotel.key_table[room.id][0] += num
+        return [True, None]
     
     def receive_keys(self, guest, room, num, hotel):
         """Hand out a key to the guest for a given room."""
         if (hotel.key_table[room.id][0] + num >= 3) or \
            (hotel.key_table[room.id][0] < num) or \
-           (guest.id not in hotel.key_table[room.id][1]):
+           (guest.id not in hotel.key_table[room.id][1].keys()):
             return [False, MSG_KEY_FAIL]
         else:
-           hotel.key_table[room.id][0] -= num
-           hotel.key_table[room.id][1].remove(guest.id)
-           return [True, None]            
+            try:
+                hotel.key_table[room.id][1][guest.id] -= num
+                hotel.key_table[room.id][0] -= num
+                return [True, None]
+            except KeyError:
+                return [False, MSG_KEY_FAIL]
+          

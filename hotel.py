@@ -218,7 +218,19 @@ class Hotel:
                 guest = Guest("Vorname_" + str(i), "Nachname_" + str(i), i)
                 self.guests.append(guest)
                 self.guests_by_id[i] = guest
+                    
+            # adding receptionists    
+            for i in range(INIT_NUM_RECEPTIONISTS):
+                receptionist = Receptionist(i)
+                self.receptionists.append(receptionist)
+                self.receptionists_by_id[i] = receptionist
                 
+            # initiating work_plan
+            self.generate_shift_plans(datetime.date.today().isocalendar()[1])
+            
+            # initiating key_table
+            self.initiate_key_table()
+            
             # adding bookings
             for i in random.sample(range(sum(INIT_NUM_ROOMS)),\
                                                             INIT_NUM_BOOKINGS):
@@ -228,12 +240,7 @@ class Hotel:
                         self.rooms[i],\
                         self)
                 
-            # adding receptionists    
-            for i in range(INIT_NUM_RECEPTIONISTS):
-                receptionist = Receptionist(i)
-                self.receptionists.append(receptionist)
-                self.receptionists_by_id[i] = receptionist
-                
+            
             self.write_to_file()
         
     def available_rooms(self, type, start, end):
@@ -268,10 +275,9 @@ class Hotel:
     
     def initiate_key_table(self):
         """ """
-        # key-disitribution: [num of keys with guests, [guests with keys]]
-        key_table = dict.fromkeys(self.rooms_by_id.keys(), [0, []])
-        self.key_table = key_table
-        
+        # key-disitribution: [num of keys with guests, {guest: num_keys}]
+        for id in self.rooms_by_id.keys():
+            self.key_table[id] = [0, {}]
         
     def generate_shift_plans(self, week, num_weeks = 4):
         """Create the num_weeks work plan for the receptionists.
@@ -294,56 +300,3 @@ class Hotel:
         return [[booking.id, booking.guest.id, booking.room.id, str(booking.start), 
                  str(booking.end)] for booking in self.bookings]
 
-                
-if __name__ == "__main__":
-    mode = 0
-    file_name = "Example_Hotel.pkl"
-    
-    if mode == 1:
-        if os.path.isfile(file_name):
-            os.remove(file_name)
-        hotel = Hotel()
-        hotel.update()
-        sys.exit()
-    
-    hotel = Hotel(file_name)    
-    #print(hotel.short_info())
-    
-    #hotel.generate_shift_plans(datetime.date.today().isocalendar()[1])
-    #print(hotel.work_plan)
-    hotel.initiate_key_table()
-    hotel.receptionists_by_id[0].handout_keys(hotel.guests_by_id[0], hotel.rooms_by_id[2], 1, hotel)
-    print(hotel.key_table)
-    
-    #hotel.update()
-    #for receptionist in hotel.receptionists_by_id.values():
-    #    print(receptionist.__str__())
-    #print
-    #hotel.receptionists_by_id[1].bill(hotel.guests[6].bookings_by_id[0], hotel)
-    #hotel.update()
-    #print(hotel.bills_by_id)
-    #print(hotel.bills_by_id[1].guest.id)
-    #for key in hotel.guests_by_id.keys():
-    #    print(key, hotel.guests_by_id[key].bills)
-    
-    #hotel.guests[6].pay(hotel.bills_by_id[], datetime.date.today(), hotel)
-    #print(len(hotel.bills))
-    #hotel.update()
-    #print(hotel.get_revenue(datetime.date(2017,1,1)))
-    
-    #for booking in hotel.bookings:
-        
-    #    print(booking.wlan_key)
-    
-    #hotel.update()
-    #start1 = datetime.date(2017, 1, 1)
-    #end1 = datetime.date(2017, 1, 19)
-    #start2 = datetime.date(2017, 1, 4)
-    #end2 = datetime.date(2017, 1, 19)
-    
-    #for room in hotel.rooms:
-    #    print(room.id, room.bookings)
-    #print(hotel.rooms[4].evaluate_occupation())
-    #print(hotel.rooms[4].is_available(start1, end1))
-    #print([room.id for room in hotel.available_rooms("double", start1, end1)])
-    
