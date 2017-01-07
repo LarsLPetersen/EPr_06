@@ -181,13 +181,6 @@ class Hotel:
             self.guests_by_id = {}  # {id1: guest1, ...}
             self.receptionists_by_id = {}  # {id1: receptionist1, ...}
             
-            # {kw_start, num_weeks, {receptionist.id: receptionist.shift_plan}}
-            self.work_plan = [None, None, {}]
-            
-            # {room.id: [num_keys_handed_out, {guest.id: num_keys}]}
-            self.key_table = {}
-            
-            
             # adding single rooms      
             for i in range(INIT_NUM_ROOMS[0]):
                 room = Room(INIT_TYPES[0], str(i + 1), INIT_PRICES[0],\
@@ -212,10 +205,17 @@ class Hotel:
                 self.receptionists_by_id[i] = receptionist
                 
             # initiating work_plan
-            self.generate_shift_plans(datetime.date.today().isocalendar()[1])
+            # {kw_start, num_weeks, {receptionist.id: receptionist.shift_plan}}
+            self.work_plan = \
+               self.generate_shift_plans(datetime.date.today().isocalendar()[1])
             
+            # set shift_plans of receptionists accordingly
+            for id in self.receptionists_by_id.keys():
+                self.receptionists_by_id[id].shift_plan = self.work_plan[2][id] 
+             
             # initiating key_table
-            self.initiate_key_table()
+            # {room.id: [num_keys_handed_out, {guest.id: num_keys}]}
+            self.key_table = self.generate_key_table()
             
             # adding bookings
             for i in random.sample(range(sum(INIT_NUM_ROOMS)),\
@@ -260,29 +260,33 @@ class Hotel:
             input.close()
         else: pass
     
-    def initiate_key_table(self):
+    def generate_key_table(self):
         """ """
         # key-disitribution: [num of keys with guests, {guest: num_keys}]
+        key_table = {}
         for id in self.rooms_by_id.keys():
-            self.key_table[id] = [0, {}]
+            key_table[id] = [0, {}]
+        return result
         
     def generate_shift_plans(self, week, num_weeks = 4):
         """Create the num_weeks work plan for the receptionists.
 
         Start from a given date.
         """
-        self.work_plan[0] = week
-        self.work_plan[1] = num_weeks
-        pattern = ["--NNNN-", "--FFF--", "SSS---N","NN---FF", "FF-SSSS"]
+        pattern = ["--NNNN-", "--FFF--", "SSS---N","NN---FF", "FF-SSSS"]      
+        
+        work_plan = [week, num_weeks, {}]
+        virtual_shift_plans = {}
         
         for id in self.receptionists_by_id.keys():
-            self.receptionists_by_id[id].shift_plan = ""
+            virtual_shift_plans[id] = ""
             for j in range(num_weeks):
                 # get the week shift sequence for an employee j
                 week_shift = pattern[((week - 1 + j) + id) % 5]
                 # adds the next weeks' sequences
-                self.receptionists_by_id[id].shift_plan += week_shift
-            self.work_plan[2][id] = self.receptionists_by_id[id].shift_plan
+                virtual_shift_plans[id] += week_shift
+            work_plan[2][id] = virtual_shift_plans[id]
+        return work_plan
         
     def _short_info(self):
         """Yields info on the bookings of the hotel (auxiliary function)"""
